@@ -58,28 +58,25 @@ const getHexParams = (hexSize) => {
 
 export const drawHexGrid = (canvasID, { rowNum, colNum }, hexSize, hexOrigin, canvasSize) => {
 	const { hexHeight, hexWidth, vertDist, horizDist } = getHexParams(hexSize);
-	const qLeftSide = Math.round(hexOrigin.x / hexWidth);
+	const qLeftSide = Math.round(hexOrigin.x / hexWidth) * 2;
 	const qRigthSide = Math.round((canvasSize.width - hexOrigin.x) / hexWidth);
 	const rTopSide = Math.round(hexOrigin.y / (hexHeight / 2));
 	const rBottomSide = Math.round((canvasSize.height - hexOrigin.y) / (hexHeight / 2));
 
-	let offset = 0;
-	for (let r = 0; r > -rTopSide; r--) {
+	let offset = Math.floor((qLeftSide + qRigthSide) / 2); // left & right hex's offset compensation
+	for (let r = -rTopSide; r <= rBottomSide; r++) {
 		for (let q = -qLeftSide; q <= qRigthSide; q++) {
 			let center = hexToPixel(Hex(q + offset, r), hexSize, hexOrigin);
-			drawHex(canvasID, center, hexSize);
-			drawHexCoordinates(canvasID, center, Hex(q, r));
+			if (
+				center.x > hexWidth / 2 &&
+				center.x < canvasSize.width - hexWidth / 2 &&
+				center.y > hexHeight / 2 &&
+				center.y < canvasSize.height - hexHeight / 2
+			) {
+				drawHex(canvasID, center, hexSize);
+				drawHexCoordinates(canvasID, center, Hex(q, r));
+			}
 		}
-		offset += Math.abs(r) % 2 === 0 ? 1 : 0;
-	}
-
-	offset = 0;
-	for (let r = 1; r <= rBottomSide; r++) {
-		for (let q = -qLeftSide; q < qRigthSide; q++) {
-			let center = hexToPixel(Hex(q - offset, r), hexSize, hexOrigin);
-			drawHex(canvasID, center, hexSize);
-			drawHexCoordinates(canvasID, center, Hex(q, r));
-		}
-		offset += Math.abs(r) % 2 === 0 ? 1 : 0;
+		offset -= Math.abs(r) % 2 === 0 ? 1 : 0;
 	}
 };
