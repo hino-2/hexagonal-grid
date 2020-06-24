@@ -51,6 +51,7 @@ const HexGridContainer = () => {
 
 		// hexGridSelected.clearCanvas();
 		hexGridSelected.drawHex({ x, y }, "#FF0000");
+		hexGridSelected.drawNeighbors(hexGridSelected.Hex(q, r, s), "#FF0000");
 
 		// console.log(q, r, s, x, y);
 	};
