@@ -1,11 +1,16 @@
 import React from "react";
+import { ContextProvider } from "../Context/Context";
+import HexGridContainer from "../HexGridContainer/HexGridContainer";
+import Settings from "../Settings/Settings";
 import "./App.scss";
-import HexGrid from "../HexGrid/HexGrid";
 
 function App() {
 	return (
 		<div className="App">
-			<HexGrid />
+			<ContextProvider>
+				<HexGridContainer />
+				<Settings />
+			</ContextProvider>
 		</div>
 	);
 }

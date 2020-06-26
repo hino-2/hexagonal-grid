@@ -24,22 +24,26 @@ class HexGrid {
 		this.ctx.clearRect(0, 0, this.canvasSize.width, this.canvasSize.height);
 	};
 
-	drawLine = (start, end, color, width) => {
-		this.ctx.beginPath();
-		this.ctx.moveTo(start.x, start.y);
+	drawLine = (end, color, width) => {
 		this.ctx.strokeStyle = color;
 		this.ctx.lineWidth = width;
 		this.ctx.lineTo(end.x, end.y);
-		this.ctx.stroke();
-		this.ctx.closePath();
 	};
 
 	drawHex = (center, color) => {
+		this.ctx.beginPath();
+		const start = this.getHexCornerCoord(center, 0);
+		this.ctx.moveTo(start.x, start.y);
 		for (let i = 0; i <= 5; i++) {
-			const start = this.getHexCornerCoord(center, i);
 			const end = this.getHexCornerCoord(center, i + 1);
-			this.drawLine(start, end, color);
+			this.drawLine(end, color);
 		}
+		if (color) {
+			this.ctx.fillStyle = color;
+			this.ctx.fill();
+		}
+		this.ctx.stroke();
+		this.ctx.closePath();
 	};
 
 	cubeRound = (cube) => {
@@ -102,12 +106,49 @@ class HexGrid {
 		return this.cubeAdd(h, this.cubeDirection(direction));
 	};
 
+	findDomainByHexCoords = ({ q, r, s }, domains) => {
+		return domains.find((domain) =>
+			domain.hexs.find(({ q: _q, r: _r, s: _s }) => _q === q && _r === r && _s === s)
+		);
+	};
+
+	getColoredNeighbor = (h, domains) => {
+		for (let i = 0; i <= 5; i++) {
+			const { q, r, s } = this.getNeighbor(h, i);
+			const neighbor = domains.find((domain) =>
+				domain.hexs.find(({ q: _q, r: _r, s: _s }) => _q === q && _r === r && _s === s)
+			);
+			if (neighbor) return neighbor;
+		}
+		return null;
+	};
+
+	getColorsOfNeighbors = (h, domains) => {
+		let colorsOfNeighbors = new Set();
+		for (let i = 0; i <= 5; i++) {
+			const { q, r, s } = this.getNeighbor(h, i);
+			let domain = this.findDomainByHexCoords({ q, r, s }, domains);
+			if (domain) {
+				colorsOfNeighbors.add(domain.color);
+				console.log(domain.color);
+			}
+		}
+		return [...colorsOfNeighbors];
+	};
+
 	drawNeighbors = (h, color) => {
 		for (let i = 0; i <= 5; i++) {
 			const { q, r, s } = this.getNeighbor(this.Hex(h.q, h.r, h.s), i);
 			const { x, y } = this.hexToPixel(this.Hex(q, r, s));
 			this.drawHex({ x, y }, color);
 		}
+	};
+
+	drawArray = (hexArray) => {
+		hexArray.forEach(({ color, hexs }) => {
+			// console.log(color, hexs);
+			hexs.forEach(({ x, y }) => this.drawHex({ x, y }, color));
+		});
 	};
 
 	drawHexCoordinates = (center, hex) => {
@@ -133,6 +174,7 @@ class HexGrid {
 				let center = this.hexToPixel(this.Hex(q + offsetQ, r));
 				this.drawHex(center);
 				this.drawHexCoordinates(center, this.Hex(q + offsetQ, r, -q - offsetQ - r));
+				this.hexMap.push({ q: q + offsetQ, r: r, s: -q - offsetQ - r });
 			}
 			if (r < this.L - 1) {
 				offsetNum++;
@@ -142,7 +184,7 @@ class HexGrid {
 		}
 	};
 
-	setParams = ({ canvasID, L, M, N, hexSize, hexOrigin, canvasSize }) => {
+	setParams = ({ canvasID, L, M, N, hexSize, canvasSize }) => {
 		this.canvasID = canvasID;
 		this.ctx = canvasID.getContext("2d");
 		this.canvasSize = canvasSize;
@@ -150,8 +192,11 @@ class HexGrid {
 		this.M = M;
 		this.N = N;
 		this.hexSize = hexSize;
-		this.hexOrigin = hexOrigin;
 		this.canvasRect = canvasID.getBoundingClientRect();
+		this.hexOrigin = {
+			x: 50 + (L + 1) * hexSize,
+			y: 50,
+		};
 	};
 
 	canvasID = null;
@@ -159,8 +204,9 @@ class HexGrid {
 	L = 0;
 	M = 0;
 	N = 0;
-	hexOrigin = { x: 0, y: 0 };
+	hexOrigin = { x: 50, y: 50 };
 	hexSize = 0;
+	hexMap = [];
 }
 
 export default HexGrid;
