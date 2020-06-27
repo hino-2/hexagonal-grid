@@ -202,6 +202,7 @@ class HexGrid {
 		this.L = L;
 		this.M = M;
 		this.N = N;
+		this.hexMap = [];
 		this.hexSize = hexSize;
 		this.canvasRect = canvasID.getBoundingClientRect();
 		this.hexOrigin = {

@@ -61,6 +61,8 @@ const Settings = () => {
 	const autoFill = () => {
 		if (Number(autoPoss) > 0 && Number(autoPoss) < 1) context.autoFill(autoPoss, context.hexMap);
 		else alert("Вероятность должна быть от 0.1 до 0.99");
+
+		context.addResult({ poss: autoPoss, domainsCount: context.domains.length, hexCount: context.hexMap.length });
 	};
 
 	return (

@@ -1,0 +1,17 @@
+.results {
+	position: absolute;
+	display: grid;
+	right: 10px;
+	width: 50%;
+
+	.table-header,
+	.table-data {
+		display: grid;
+		grid-template-columns: 1fr 1fr 1fr 1fr;
+
+		div {
+			text-align: center;
+			border: 1px solid black;
+		}
+	}
+}

@@ -57,7 +57,7 @@ const HexGridContainer = () => {
 			N: hexGridSize.N,
 			hexSize: hexSize,
 		});
-		hexGridBase.drawHexGrid();
+		requestAnimationFrame(() => hexGridBase.drawHexGrid());
 
 		context.setHexMap(hexGridBase.hexMap);
 		context.clearSelected();
@@ -78,7 +78,7 @@ const HexGridContainer = () => {
 
 	useEffect(() => {
 		hexGridDomains.clearCanvas();
-		hexGridDomains.drawArray(context.selected);
+		requestAnimationFrame(() => hexGridDomains.drawArray(context.selected));
 	});
 
 	const handleMouseClick = (e) => {

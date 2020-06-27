@@ -8,7 +8,7 @@ export const ContextProvider = (props) => {
 	const changeHexGridParams = (newParams = {}) => {
 		log("changeHexGridParams", "h3");
 		setContext((prev) => {
-			return { ...prev, ...newParams };
+			return { ...prev, ...newParams, selected: [] };
 		});
 	};
 
@@ -188,15 +188,29 @@ export const ContextProvider = (props) => {
 		});
 	};
 
+	const addResult = (result) => {
+		setContext((prev) => {
+			let res = [...prev.results, result];
+
+			if (res.length > 10) res = res.slice(1);
+
+			return {
+				...prev,
+				results: res,
+			};
+		});
+	};
+
 	const [context, setContext] = useState({
-		L: 3,
+		L: 12,
 		M: 5,
 		N: 7,
 		hexSize: 20,
-		canvasSize: { width: window.innerWidth, height: 600 },
+		canvasSize: { width: window.innerWidth - 2, height: 500 },
 		hexMap: [],
 		selected: [],
 		domains: [],
+		results: [],
 		changeHexGridParams: changeHexGridParams,
 		addHexToSelected: addHexToSelected,
 		removeHexFromDomains: removeHexFromDomains,
@@ -204,6 +218,7 @@ export const ContextProvider = (props) => {
 		clearSelected: clearSelected,
 		calcDomains: calcDomains,
 		autoFill: autoFill,
+		addResult: addResult,
 	});
 	// console.log("context.domains", context.domains);
 	// console.log(context.hexMap);
