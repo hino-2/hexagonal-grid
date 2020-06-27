@@ -8,6 +8,7 @@ const Settings = () => {
 	const [L, setL] = useState(context.L);
 	const [M, setM] = useState(context.M);
 	const [N, setN] = useState(context.N);
+	const [autoPoss, setAutoPoss] = useState(0.5);
 	const [canvasWidth, setCanvasWidth] = useState(window.innerWidth);
 	const [canvasHeight, setCanvasHeight] = useState(context.canvasSize.height);
 	const [domainsCount, setDomainsCount] = useState("неизвестно");
@@ -18,12 +19,15 @@ const Settings = () => {
 		settingsDiv.current.style.top = `${context.canvasSize.height + 10}px`;
 	}, [context.canvasSize.height]);
 
-	const handleDimensionsChange = (e) => {
+	const handleChange = (e) => {
 		if (e.target.id === "L") setL(e.target.value);
 		if (e.target.id === "M") setM(e.target.value);
 		if (e.target.id === "N") setN(e.target.value);
 		if (e.target.id === "canvasWidth") setCanvasWidth(e.target.value);
 		if (e.target.id === "canvasHeight") setCanvasHeight(e.target.value);
+		if (e.target.id === "autoPoss") {
+			setAutoPoss(e.target.value);
+		}
 	};
 
 	const changeGridDimensions = () => {
@@ -51,7 +55,12 @@ const Settings = () => {
 	};
 
 	const showDomainsCount = () => {
-		setDomainsCount(context.domains.length);
+		setDomainsCount(context.calcDomains(context.hexMap, context.selected));
+	};
+
+	const autoFill = () => {
+		if (Number(autoPoss) > 0 && Number(autoPoss) < 1) context.autoFill(autoPoss, context.hexMap);
+		else alert("Вероятность должна быть от 0.1 до 0.99");
 	};
 
 	return (
@@ -60,31 +69,31 @@ const Settings = () => {
 				<label htmlFor="L">L</label>&nbsp;&nbsp;
 			</div>
 			<div>
-				<input type="text" value={L} onChange={handleDimensionsChange} id="L" />
+				<input type="text" value={L} onChange={handleChange} id="L" />
 			</div>
 			<div>
 				<label htmlFor="M">M</label>&nbsp;&nbsp;
 			</div>
 			<div>
-				<input type="text" value={M} onChange={handleDimensionsChange} id="M" />
+				<input type="text" value={M} onChange={handleChange} id="M" />
 			</div>
 			<div>
 				<label htmlFor="N">N</label>&nbsp;&nbsp;
 			</div>
 			<div>
-				<input type="text" value={N} onChange={handleDimensionsChange} id="N" />
+				<input type="text" value={N} onChange={handleChange} id="N" />
 			</div>
 			<div>
 				<label htmlFor="canvasWidth">Ширина поля</label>&nbsp;&nbsp;
 			</div>
 			<div>
-				<input type="text" value={canvasWidth} onChange={handleDimensionsChange} id="canvasWidth" />
+				<input type="text" value={canvasWidth} onChange={handleChange} id="canvasWidth" />
 			</div>
 			<div>
 				<label htmlFor="canvasHeight">Высота поля</label>&nbsp;&nbsp;
 			</div>
 			<div>
-				<input type="text" value={canvasHeight} onChange={handleDimensionsChange} id="canvasHeight" />
+				<input type="text" value={canvasHeight} onChange={handleChange} id="canvasHeight" />
 			</div>
 			<div>&nbsp;</div>
 			<div>
@@ -101,6 +110,18 @@ const Settings = () => {
 			<div>&nbsp;</div>
 			<div>
 				<button onClick={showDomainsCount}>Рассчитать кол-во</button>
+			</div>{" "}
+			<div>&nbsp;</div>
+			<div>&nbsp;</div>
+			<div>
+				<label htmlFor="autoPoss">Вероятность</label>&nbsp;&nbsp;
+			</div>
+			<div>
+				<input type="text" value={autoPoss} onChange={handleChange} id="autoPoss" />
+			</div>
+			<div>&nbsp;</div>
+			<div>
+				<button onClick={autoFill}>АВТО</button>
 			</div>
 		</div>
 	);

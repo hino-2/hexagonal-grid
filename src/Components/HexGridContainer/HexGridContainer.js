@@ -59,7 +59,9 @@ const HexGridContainer = () => {
 		});
 		hexGridBase.drawHexGrid();
 
-		context.clearDomains();
+		context.setHexMap(hexGridBase.hexMap);
+		context.clearSelected();
+
 		log("redraw canvas", "h2");
 	}, [canvasKey]);
 
@@ -75,8 +77,9 @@ const HexGridContainer = () => {
 	});
 
 	useEffect(() => {
-		hexGridDomains.drawArray(context.domains);
-	}, [context.domains]);
+		hexGridDomains.clearCanvas();
+		hexGridDomains.drawArray(context.selected);
+	});
 
 	const handleMouseClick = (e) => {
 		log("mouse clicked", "h2");
@@ -84,27 +87,39 @@ const HexGridContainer = () => {
 		const offsetY = e.pageY - hexGridBase.canvasRect.top;
 		const { q, r, s } = hexGridBase.cubeRound(hexGridBase.pixelToHex(hexGridBase.Point(offsetX, offsetY)));
 
-		if (!hexGridBase.hexMap.find(({ q: _q, r: _r, s: _s }) => _q === q && _r === r && _s === s)) return;
+		let insideMap = hexGridBase.hexMap.find(({ q: _q, r: _r, s: _s }) => _q === q && _r === r && _s === s);
+		if (!insideMap) return;
+		else insideMap.checked = 1;
+
+		if (context.selected.find(({ q: _q, r: _r, s: _s }) => _q === q && _r === r && _s === s)) {
+			log("removing", "h3");
+			insideMap.checked = 0;
+			context.removeHexFromDomains({ q, r, s });
+			context.setHexMap(hexGridBase.hexMap);
+
+			return;
+		}
 
 		const { x, y } = hexGridBase.hexToPixel(hexGridBase.Hex(q, r, s));
 
-		let randomDistinctColor;
-		const coloredNeighbor = hexGridDomains.getColoredNeighbor(hexGridBase.Hex(q, r, s), context.domains);
+		//#region
+		// let randomDistinctColor;
+		// const coloredNeighbor = hexGridDomains.getColoredNeighbor(hexGridBase.Hex(q, r, s), context.domains);
 
-		if (!coloredNeighbor) {
-			randomDistinctColor = colors[Math.floor(Math.random() * colors.length)];
-			if (!randomDistinctColor) {
-				alert("Максимум 21 домен. Закончились цвета.");
-				return;
-			}
-			setColors(colors.filter((color) => color !== randomDistinctColor));
-		}
+		// if (!coloredNeighbor) {
+		// 	randomDistinctColor = colors[Math.floor(Math.random() * colors.length)];
+		// 	if (!randomDistinctColor) {
+		// 		alert("Максимум 21 домен. Закончились цвета.");
+		// 		return;
+		// 	}
+		// 	setColors(colors.filter((color) => color !== randomDistinctColor));
+		// }
 
-		const color = coloredNeighbor ? coloredNeighbor.color : randomDistinctColor;
-		// : "#" + Math.round(Math.random() * 2 ** 24 - 1).toString(16);
-
-		context.addHexToDomains({ q, r, s, x, y, color });
-		// context.addHexToDomains1({ q: 1, r: 2, s: 3, x: 4, y: 5, color: "red" });
+		// const color = coloredNeighbor ? coloredNeighbor.color : randomDistinctColor;
+		// // : "#" + Math.round(Math.random() * 2 ** 24 - 1).toString(16);
+		//#endregion
+		context.addHexToSelected({ q, r, s, x, y, undefined });
+		context.setHexMap(hexGridBase.hexMap);
 	};
 
 	return (

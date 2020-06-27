@@ -106,36 +106,38 @@ class HexGrid {
 		return this.cubeAdd(h, this.cubeDirection(direction));
 	};
 
-	findDomainByHexCoords = ({ q, r, s }, domains) => {
-		return domains.find((domain) =>
-			domain.hexs.find(({ q: _q, r: _r, s: _s }) => _q === q && _r === r && _s === s)
-		);
-	};
+	//#region
+	// findDomainByHexCoords = ({ q, r, s }, domains) => {
+	// 	return domains.find((domain) =>
+	// 		domain.hexs.find(({ q: _q, r: _r, s: _s }) => _q === q && _r === r && _s === s)
+	// 	);
+	// };
 
-	getColoredNeighbor = (h, domains) => {
-		for (let i = 0; i <= 5; i++) {
-			const { q, r, s } = this.getNeighbor(h, i);
-			const neighbor = domains.find((domain) =>
-				domain.hexs.find(({ q: _q, r: _r, s: _s }) => _q === q && _r === r && _s === s)
-			);
-			if (neighbor) return neighbor;
-		}
-		return null;
-	};
+	// getColoredNeighbor = (h, domains) => {
+	// 	for (let i = 0; i <= 5; i++) {
+	// 		const { q, r, s } = this.getNeighbor(h, i);
+	// 		const neighbor = domains.find((domain) =>
+	// 			domain.hexs.find(({ q: _q, r: _r, s: _s }) => _q === q && _r === r && _s === s)
+	// 		);
+	// 		if (neighbor) return neighbor;
+	// 	}
+	// 	return null;
+	// };
 
-	getColorsOfNeighbors = (h, domains) => {
-		let colorsOfNeighbors = new Set();
-		for (let i = 0; i <= 5; i++) {
-			const { q, r, s } = this.getNeighbor(h, i);
-			let domain = this.findDomainByHexCoords({ q, r, s }, domains);
-			if (domain) {
-				colorsOfNeighbors.add(domain.color);
-				console.log(domain.color);
-			}
-		}
-		return [...colorsOfNeighbors];
-	};
-
+	// getColorsOfNeighbors = (h, domains) => {
+	// 	let colorsOfNeighbors = new Set();
+	// 	for (let i = 0; i <= 5; i++) {
+	// 		const { q, r, s } = this.getNeighbor(h, i);
+	// 		let domain = this.findDomainByHexCoords({ q, r, s }, domains);
+	// 		if (domain) {
+	// 			colorsOfNeighbors.add(domain.color);
+	// 			console.log(domain.color);
+	// 		}
+	// 		console.log("colorsOfNeighbors", colorsOfNeighbors);
+	// 	}
+	// 	return [...colorsOfNeighbors];
+	// };
+	//#endregion
 	drawNeighbors = (h, color) => {
 		for (let i = 0; i <= 5; i++) {
 			const { q, r, s } = this.getNeighbor(this.Hex(h.q, h.r, h.s), i);
@@ -145,16 +147,17 @@ class HexGrid {
 	};
 
 	drawArray = (hexArray) => {
-		hexArray.forEach(({ color, hexs }) => {
-			// console.log(color, hexs);
-			hexs.forEach(({ x, y }) => this.drawHex({ x, y }, color));
-		});
+		// hexArray.forEach(({ color, hexs }) => {
+		// 	hexs.forEach(({ x, y }) => this.drawHex({ x, y }, color));
+		// });
+		hexArray.forEach(({ x, y }) => this.drawHex({ x, y }, "red"));
 	};
 
-	drawHexCoordinates = (center, hex) => {
+	drawHexCoordinates = (center, hex, checked) => {
 		this.ctx.fillText(hex.q, center.x + 5, center.y - 5);
 		this.ctx.fillText(hex.r, center.x - 9, center.y - 5);
-		this.ctx.fillText(hex.s, center.x - 5, center.y + 10);
+		this.ctx.fillText(hex.s, center.x - 5, center.y + 12);
+		// this.ctx.fillText(checked, center.x, center.y);
 	};
 
 	// const getHexParams = () => {
@@ -172,9 +175,17 @@ class HexGrid {
 		for (let r = 0; r < this.L + this.M - 1; r++) {
 			for (let q = 0; q < this.N + offsetNum; q++) {
 				let center = this.hexToPixel(this.Hex(q + offsetQ, r));
+				let checked = 0;
 				this.drawHex(center);
-				this.drawHexCoordinates(center, this.Hex(q + offsetQ, r, -q - offsetQ - r));
-				this.hexMap.push({ q: q + offsetQ, r: r, s: -q - offsetQ - r });
+				this.drawHexCoordinates(center, this.Hex(q + offsetQ, r, -q - offsetQ - r), checked);
+				this.hexMap.push({
+					q: q + offsetQ,
+					r: r,
+					s: -q - offsetQ - r,
+					checked: checked,
+					x: center.x,
+					y: center.y,
+				});
 			}
 			if (r < this.L - 1) {
 				offsetNum++;
