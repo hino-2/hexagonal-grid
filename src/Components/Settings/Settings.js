@@ -41,7 +41,7 @@ const Settings = () => {
 			N: parseInt(N),
 			canvasSize: {
 				width:
-					(parseInt(M) - parseInt(L) + parseInt(N)) * Math.sqrt(3) * context.hexSize +
+					(((Math.max(parseInt(M), parseInt(L)) + parseInt(N)) * 2 * 3) / 4) * context.hexSize +
 					100 +
 					(((parseInt(L) + 1) * 3) / 4) * context.hexSize,
 				height: ((parseInt(L) + parseInt(M)) * context.hexSize * 2 * 3) / 4 + 50,
