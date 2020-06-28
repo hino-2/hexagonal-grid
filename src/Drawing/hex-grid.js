@@ -150,7 +150,7 @@ class HexGrid {
 		// hexArray.forEach(({ color, hexs }) => {
 		// 	hexs.forEach(({ x, y }) => this.drawHex({ x, y }, color));
 		// });
-		hexArray.forEach(({ x, y }) => this.drawHex({ x, y }, "red"));
+		hexArray.forEach(({ x, y, color }) => this.drawHex({ x, y }, color || "red"));
 	};
 
 	drawHexCoordinates = (center, hex, checked) => {

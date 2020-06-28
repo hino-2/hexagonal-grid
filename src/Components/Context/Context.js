@@ -6,35 +6,13 @@ export const Context = createContext();
 
 export const ContextProvider = (props) => {
 	const changeHexGridParams = (newParams = {}) => {
-		log("changeHexGridParams", "h3");
+		// log("changeHexGridParams", "h3");
 		setContext((prev) => {
 			return { ...prev, ...newParams, selected: [] };
 		});
 	};
 
-	// const setDomainsCount = (n) => {
-	// 	setContext((prev) => {
-	// 		return { ...prev, domainsCount: n };
-	// 	});
-	// };
-
-	// const addHexToExistingDomain = ({ q, r, s, x, y }, existingDomain) => {
-	// 	if (!existingDomain.hexs.find(({ q: _q, r: _r, s: _s }) => _q === q && _r === r && _s === s))
-	// 		existingDomain.hexs.push({ q, r, s, x, y });
-	// };
-
-	// const joinDomains = (existingDomain, domainsNearby) => {
-	// 	const result = Object.create(existingDomain);
-	// 	domainsNearby.forEach((d) => {
-	// 		d.hexs.forEach((h) => addHexToExistingDomain(h, result));
-	// 	});
-	// 	return result;
-	// };
-
 	const addHexToSelected = ({ q, r, s, x, y, color }) => {
-		// const hg = new HexGrid();
-		log("addHexToDomains", "h3");
-
 		setContext((prev) => {
 			//#region
 			// let res = [];
@@ -91,7 +69,7 @@ export const ContextProvider = (props) => {
 	};
 
 	const clearSelected = () => {
-		log("clearDomains", "h3");
+		// log("clearDomains", "h3");
 		setContext((prev) => {
 			return {
 				...prev,
@@ -134,56 +112,148 @@ export const ContextProvider = (props) => {
 		return cubeAdd(h, cubeDirection(direction));
 	};
 
-	const floodFill = (h, replacementColor, selected) => {
-		const targetColor = h.color;
-		if (targetColor === replacementColor) return;
-		if (!selected.find(({ q: _q, r: _r, s: _s }) => _q === h.q && _r === h.r && _s === h.s)) return;
+	const splitSelectedToDomains = (selected) => {
+		let domains = [];
+		selected.forEach((s) => {
+			const existingDomain = domains.find((d) => d.color === s.color);
+			if (existingDomain) {
+				existingDomain.hexs.push({
+					q: s.q,
+					r: s.r,
+					s: s.s,
+				});
+			} else {
+				domains.push({
+					color: s.color,
+					hexs: [{ q: s.q, r: s.r, s: s.s }],
+				});
+			}
+		});
 
-		h.color = replacementColor;
-		for (let i = 0; i <= 5; i++) {
-			floodFill(getNeighbor(h, i), replacementColor, selected);
-		}
-
-		//#region
-		// let Q = [];
-		// Q.push({ q, r, s });
-		// Q.forEach((N, i, Q) => {
-		// 	let w = { q: N.q, r: N.r, s: N.s };
-		// 	let e = { q: N.q, r: N.r, s: N.s };
-
-		// 	let i = 0
-		// 	while(selected.find(({ q, r, s }) => w.q === q - i && w.r === r && w.s === s)) {
-
-		// 		i--
-		// 	}
-		// });
-		//#endregion
+		return domains;
 	};
 
-	const calcDomains = (hexMap, selected) => {
-		let count = 0;
+	const floodFill = (h, color, hexMap, selected) => {
+		if (h.color) return;
 
+		h.color = color;
+		selected.find(({ q, r, s }) => q === h.q && r === h.r && s === h.s).color = color;
+		for (let i = 0; i <= 5; i++) {
+			const neighbor = getNeighbor(h, i);
+			const neighborOnMap = hexMap.find(
+				({ q, r, s }) => q === neighbor.q && r === neighbor.r && s === neighbor.s
+			);
+			if (neighborOnMap && neighborOnMap.checked) floodFill(neighborOnMap, color, hexMap, selected);
+		}
+	};
+
+	const floodFillHexMap = (hexMap, selected) => {
 		hexMap
 			.filter((h) => h.checked)
 			.forEach((h) => {
-				const replacementColor = "#" + Math.round(Math.random() * 2 ** 24 - 1).toString(16);
-				floodFill(h, replacementColor, selected);
+				const color =
+					"#" +
+					Math.round(Math.random() * 2 ** 24 - 1)
+						.toString(16)
+						.padStart(6, "0");
+				floodFill(h, color, hexMap, selected);
+			});
+	};
+
+	const checkIfMultiConnected = (d, hexMap, selected, totalNumberOfDomains) => {
+		let _mcHexMap, _mcSelected;
+		let i = 0;
+
+		if (d.hexs.length <= 2) return 0;
+
+		d.hexs.forEach(({ q, r, s }) => {
+			_mcSelected = JSON.parse(
+				JSON.stringify(
+					selected.filter(({ q: _q, r: _r, s: _s }) => [q, r, s].join(",") !== [_q, _r, _s].join(","))
+				)
+			);
+			_mcHexMap = JSON.parse(
+				JSON.stringify(
+					hexMap.filter(({ q: _q, r: _r, s: _s }) => [q, r, s].join(",") !== [_q, _r, _s].join(","))
+				)
+			);
+
+			_mcHexMap.forEach((h) => (h.color = undefined));
+			_mcSelected.forEach((h) => (h.color = undefined));
+			floodFillHexMap(_mcHexMap, _mcSelected);
+
+			const newNumberOfDomains = new Set(_mcSelected.map((s) => s.color)).size;
+
+			if (totalNumberOfDomains === newNumberOfDomains) i++;
+		});
+
+		if (i === d.hexs.length) return 1;
+		return 0;
+	};
+
+	const calcDomains = (hexMap, selected, auto) => {
+		console.log("start");
+		let domains = [];
+		hexMap.forEach((h) => (h.color = undefined));
+
+		floodFillHexMap(hexMap, selected);
+		domains = splitSelectedToDomains(selected);
+		const totalNumberOfDomains = domains.length;
+
+		// multi-connection search
+		let numOfMultiConnectedDomains = 0;
+
+		domains.forEach((d) => {
+			numOfMultiConnectedDomains += checkIfMultiConnected(d, hexMap, selected, totalNumberOfDomains);
+		});
+		console.log("done");
+		// multi-connection search end
+
+		if (!auto)
+			setContext((prev) => {
+				return {
+					...prev,
+					hexMap: hexMap,
+					selected: selected,
+					domains: domains,
+				};
 			});
 
-		return count;
+		return { totalNumberOfDomains, numOfMultiConnectedDomains };
 	};
 
 	const autoFill = (p, hexMap) => {
 		hexMap.forEach((h) => {
 			let check = Math.random();
 			h.checked = check <= p ? 1 : 0;
+			h.color = undefined;
 		});
 
+		const numOfDomains = calcDomains(
+			hexMap,
+			hexMap.filter((h) => h.checked, true)
+		);
+
 		setContext((prev) => {
+			let res = [
+				...prev.results,
+				{
+					poss: p,
+					domainsCount: numOfDomains.totalNumberOfDomains,
+					multiConnected: numOfDomains.numOfMultiConnectedDomains,
+					hexCount: hexMap.length,
+					hexChecked: hexMap.filter((h) => h.checked).length,
+				},
+			];
+
+			if (res.length > 10) res = res.slice(1);
+
 			return {
 				...prev,
 				hexMap: hexMap,
 				selected: hexMap.filter((h) => h.checked),
+				results: res,
+				domainsCount: numOfDomains,
 			};
 		});
 	};
@@ -202,15 +272,16 @@ export const ContextProvider = (props) => {
 	};
 
 	const [context, setContext] = useState({
-		L: 12,
+		L: 3,
 		M: 5,
 		N: 7,
 		hexSize: 20,
-		canvasSize: { width: window.innerWidth - 2, height: 500 },
+		canvasSize: { width: window.innerWidth - 2, height: 300 },
 		hexMap: [],
 		selected: [],
 		domains: [],
 		results: [],
+		domainsCount: 0,
 		changeHexGridParams: changeHexGridParams,
 		addHexToSelected: addHexToSelected,
 		removeHexFromDomains: removeHexFromDomains,

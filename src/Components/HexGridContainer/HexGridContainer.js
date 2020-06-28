@@ -62,7 +62,7 @@ const HexGridContainer = () => {
 		context.setHexMap(hexGridBase.hexMap);
 		context.clearSelected();
 
-		log("redraw canvas", "h2");
+		// log("redraw canvas", "h2");
 	}, [canvasKey]);
 
 	useEffect(() => {
@@ -82,7 +82,6 @@ const HexGridContainer = () => {
 	});
 
 	const handleMouseClick = (e) => {
-		log("mouse clicked", "h2");
 		const offsetX = e.pageX - hexGridBase.canvasRect.left - hexSize * 2;
 		const offsetY = e.pageY - hexGridBase.canvasRect.top;
 		const { q, r, s } = hexGridBase.cubeRound(hexGridBase.pixelToHex(hexGridBase.Point(offsetX, offsetY)));
@@ -92,7 +91,7 @@ const HexGridContainer = () => {
 		else insideMap.checked = 1;
 
 		if (context.selected.find(({ q: _q, r: _r, s: _s }) => _q === q && _r === r && _s === s)) {
-			log("removing", "h3");
+			// log("removing", "h3");
 			insideMap.checked = 0;
 			context.removeHexFromDomains({ q, r, s });
 			context.setHexMap(hexGridBase.hexMap);

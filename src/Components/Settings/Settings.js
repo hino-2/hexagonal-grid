@@ -50,20 +50,34 @@ const Settings = () => {
 			L: parseInt(L),
 			M: parseInt(M),
 			N: parseInt(N),
-			canvasSize: { width: parseInt(canvasWidth), height: parseInt(canvasHeight) },
+			canvasSize: {
+				width: parseInt(canvasWidth),
+				height: ((parseInt(L) + parseInt(M)) * context.hexSize * 2 * 3) / 4 + 50,
+			},
 		});
 	};
 
 	const showDomainsCount = () => {
-		setDomainsCount(context.calcDomains(context.hexMap, context.selected));
+		const numOfDomains = context.calcDomains(context.hexMap, context.selected, false);
+		setDomainsCount(numOfDomains.totalNumberOfDomains);
+
+		context.addResult({
+			poss: "manual",
+			domainsCount: numOfDomains.totalNumberOfDomains,
+			multiConnected: numOfDomains.numOfMultiConnectedDomains,
+			hexCount: context.hexMap.length,
+			hexChecked: context.hexMap.filter((h) => h.checked).length,
+		});
 	};
 
 	const autoFill = () => {
 		if (Number(autoPoss) > 0 && Number(autoPoss) < 1) context.autoFill(autoPoss, context.hexMap);
 		else alert("Вероятность должна быть от 0.1 до 0.99");
-
-		context.addResult({ poss: autoPoss, domainsCount: context.domains.length, hexCount: context.hexMap.length });
 	};
+
+	useEffect(() => {
+		setDomainsCount(context.domainsCount.totalNumberOfDomains);
+	}, [context.domainsCount.totalNumberOfDomains]);
 
 	return (
 		<div className="settings" ref={settingsDiv}>
@@ -104,18 +118,6 @@ const Settings = () => {
 			<div>&nbsp;</div>
 			<div>&nbsp;</div>
 			<div>
-				<label htmlFor="domainsCount">Кол-во доменов</label>&nbsp;&nbsp;
-			</div>
-			<div>
-				<label>{domainsCount}</label>
-			</div>
-			<div>&nbsp;</div>
-			<div>
-				<button onClick={showDomainsCount}>Рассчитать кол-во</button>
-			</div>{" "}
-			<div>&nbsp;</div>
-			<div>&nbsp;</div>
-			<div>
 				<label htmlFor="autoPoss">Вероятность</label>&nbsp;&nbsp;
 			</div>
 			<div>
@@ -124,6 +126,18 @@ const Settings = () => {
 			<div>&nbsp;</div>
 			<div>
 				<button onClick={autoFill}>АВТО</button>
+			</div>
+			<div>&nbsp;</div>
+			<div>&nbsp;</div>
+			<div>
+				<label htmlFor="domainsCount">Кол-во доменов</label>&nbsp;&nbsp;
+			</div>
+			<div>
+				<label>{domainsCount}</label>
+			</div>
+			<div>&nbsp;</div>
+			<div>
+				<button onClick={showDomainsCount}>Рассчитать кол-во</button>
 			</div>
 		</div>
 	);

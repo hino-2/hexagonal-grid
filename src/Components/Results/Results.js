@@ -29,8 +29,8 @@ const Results = () => {
 					<React.Fragment key={uniqid()}>
 						<div className="row">{row.poss}</div>
 						<div className="row">{row.domainsCount}</div>
-						<div className="row">{"unknown"}</div>
-						<div className="row">{row.hexCount}</div>
+						<div className="row">{row.multiConnected}</div>
+						<div className="row">{`${row.hexCount}, ${row.hexChecked}`}</div>
 					</React.Fragment>
 				))}
 			</div>
