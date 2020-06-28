@@ -2,6 +2,46 @@
 	position: absolute;
 	left: 10px;
 	display: grid;
-	grid-template-columns: 1fr 5fr;
+	grid-template-columns: 1fr 2fr;
 	justify-content: start;
+	width: calc(50% - 10px);
+
+	div {
+		margin: 2px;
+	}
+
+	input {
+		width: calc(50% - 12px);
+		font-size: 14px;
+		border: 0;
+		border-bottom: 1px solid black;
+		border-radius: 2px 2px 0 0;
+		padding-left: 10px;
+		outline-color: red;
+		background-color: white;
+		transition: background-color 0.2s;
+
+		&:hover {
+			background-color: rgb(214, 214, 214);
+			transition: background-color 0.2s;
+		}
+	}
+
+	button {
+		width: 50%;
+		height: 30px;
+		outline: 0;
+		border: 0;
+		border-radius: 2px;
+		background-color: dodgerblue;
+		font-size: 14px;
+		color: #ffffff;
+		cursor: pointer;
+		transition: background-color 0.2s;
+
+		&:hover {
+			background-color: rgb(23, 113, 202);
+			transition: background-color 0.2s;
+		}
+	}
 }

@@ -131,7 +131,7 @@ export const ContextProvider = (props) => {
 		M: 5,
 		N: 7,
 		hexSize: 20,
-		canvasSize: { width: window.innerWidth - 2, height: 300 },
+		canvasSize: { width: window.innerWidth - 2, height: 290 },
 		hexMap: [],
 		selected: [],
 		domains: [],

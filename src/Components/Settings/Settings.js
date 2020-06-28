@@ -9,8 +9,6 @@ const Settings = () => {
 	const [M, setM] = useState(context.M);
 	const [N, setN] = useState(context.N);
 	const [autoPossibility, setAutoPossibility] = useState(0.5);
-	const [canvasWidth, setCanvasWidth] = useState(window.innerWidth);
-	const [canvasHeight, setCanvasHeight] = useState(context.canvasSize.height);
 	const [domainsCount, setDomainsCount] = useState("неизвестно");
 
 	const settingsDiv = useRef();
@@ -23,13 +21,11 @@ const Settings = () => {
 		if (e.target.id === "L") setL(e.target.value);
 		if (e.target.id === "M") setM(e.target.value);
 		if (e.target.id === "N") setN(e.target.value);
-		if (e.target.id === "canvasWidth") setCanvasWidth(e.target.value);
-		if (e.target.id === "canvasHeight") setCanvasHeight(e.target.value);
 		if (e.target.id === "autoPoss") setAutoPossibility(e.target.value);
 	};
 
 	const changeGridDimensions = () => {
-		if (isNaN(L) || isNaN(M) || isNaN(N) || isNaN(canvasWidth) || isNaN(canvasHeight)) {
+		if (isNaN(L) || isNaN(M) || isNaN(N)) {
 			alert("Размеры должны быть числами");
 			return;
 		}
@@ -39,17 +35,15 @@ const Settings = () => {
 			return;
 		}
 
-		if (canvasWidth <= 0 || canvasWidth > 2000 || canvasHeight <= 0 || canvasHeight > 2000) {
-			alert("Размеры поля должны быть от 1 до 1000");
-			return;
-		}
-
 		context.changeHexGridParams({
 			L: parseInt(L),
 			M: parseInt(M),
 			N: parseInt(N),
 			canvasSize: {
-				width: parseInt(canvasWidth),
+				width:
+					(parseInt(M) - parseInt(L) + parseInt(N)) * Math.sqrt(3) * context.hexSize +
+					100 +
+					(((parseInt(L) + 1) * 3) / 4) * context.hexSize,
 				height: ((parseInt(L) + parseInt(M)) * context.hexSize * 2 * 3) / 4 + 50,
 			},
 		});
@@ -89,18 +83,6 @@ const Settings = () => {
 			</div>
 			<div>
 				<input type="text" value={N} onChange={handleChange} id="N" />
-			</div>
-			<div>
-				<label htmlFor="canvasWidth">Ширина поля</label>&nbsp;&nbsp;
-			</div>
-			<div>
-				<input type="text" value={canvasWidth} onChange={handleChange} id="canvasWidth" />
-			</div>
-			<div>
-				<label htmlFor="canvasHeight">Высота поля</label>&nbsp;&nbsp;
-			</div>
-			<div>
-				<input type="text" value={canvasHeight} onChange={handleChange} id="canvasHeight" />
 			</div>
 			<div>&nbsp;</div>
 			<div>

@@ -2,7 +2,7 @@
 	position: absolute;
 	display: grid;
 	right: 10px;
-	width: 50%;
+	width: calc(50% - 10px);
 
 	.table-header,
 	.table-data {
@@ -12,6 +12,13 @@
 		div {
 			text-align: center;
 			border: 1px solid black;
+		}
+	}
+
+	.table-header {
+		div {
+			display: grid;
+			align-items: center;
 		}
 	}
 }

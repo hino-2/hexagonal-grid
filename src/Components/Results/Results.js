@@ -10,7 +10,7 @@ const Results = () => {
 	const results = context.results;
 
 	useEffect(() => {
-		resultsDiv.current.style.top = `${context.canvasSize.height + 10}px`;
+		resultsDiv.current.style.top = `${context.canvasSize.height + 20}px`;
 	}, [context.canvasSize.height]);
 
 	return (
