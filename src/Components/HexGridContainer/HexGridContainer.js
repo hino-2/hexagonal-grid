@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useContext } from "react";
+import React, { useRef, useEffect, useContext } from "react";
 import { Context } from "../Context/Context";
 import HexGrid from "../../Drawing/hex-grid";
 import "./style.scss";
