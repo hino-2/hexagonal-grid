@@ -8,7 +8,7 @@ const Settings = () => {
 	const [L, setL] = useState(context.L);
 	const [M, setM] = useState(context.M);
 	const [N, setN] = useState(context.N);
-	const [autoPoss, setAutoPoss] = useState(0.5);
+	const [autoPossibility, setAutoPossibility] = useState(0.5);
 	const [canvasWidth, setCanvasWidth] = useState(window.innerWidth);
 	const [canvasHeight, setCanvasHeight] = useState(context.canvasSize.height);
 	const [domainsCount, setDomainsCount] = useState("неизвестно");
@@ -25,9 +25,7 @@ const Settings = () => {
 		if (e.target.id === "N") setN(e.target.value);
 		if (e.target.id === "canvasWidth") setCanvasWidth(e.target.value);
 		if (e.target.id === "canvasHeight") setCanvasHeight(e.target.value);
-		if (e.target.id === "autoPoss") {
-			setAutoPoss(e.target.value);
-		}
+		if (e.target.id === "autoPoss") setAutoPossibility(e.target.value);
 	};
 
 	const changeGridDimensions = () => {
@@ -60,18 +58,11 @@ const Settings = () => {
 	const showDomainsCount = () => {
 		const numOfDomains = context.calcDomains(context.hexMap, context.selected, false);
 		setDomainsCount(numOfDomains.totalNumberOfDomains);
-
-		context.addResult({
-			poss: "manual",
-			domainsCount: numOfDomains.totalNumberOfDomains,
-			multiConnected: numOfDomains.numOfMultiConnectedDomains,
-			hexCount: context.hexMap.length,
-			hexChecked: context.hexMap.filter((h) => h.checked).length,
-		});
 	};
 
 	const autoFill = () => {
-		if (Number(autoPoss) > 0 && Number(autoPoss) < 1) context.autoFill(autoPoss, context.hexMap);
+		if (Number(autoPossibility) > 0 && Number(autoPossibility) < 1)
+			context.autoFill(autoPossibility, context.hexMap);
 		else alert("Вероятность должна быть от 0.1 до 0.99");
 	};
 
@@ -121,7 +112,7 @@ const Settings = () => {
 				<label htmlFor="autoPoss">Вероятность</label>&nbsp;&nbsp;
 			</div>
 			<div>
-				<input type="text" value={autoPoss} onChange={handleChange} id="autoPoss" />
+				<input type="text" value={autoPossibility} onChange={handleChange} id="autoPoss" />
 			</div>
 			<div>&nbsp;</div>
 			<div>
