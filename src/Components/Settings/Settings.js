@@ -10,12 +10,78 @@ const Settings = () => {
 	const [N, setN] = useState(context.N);
 	const [autoPossibility, setAutoPossibility] = useState(0.5);
 	const [domainsCount, setDomainsCount] = useState("неизвестно");
+	const [message, setMessage] = useState("");
+	const [buttonStyles, setButtonStyles] = useState({});
+	const [timerID, setTimerID] = useState();
 
 	const settingsDiv = useRef();
 
 	useEffect(() => {
 		settingsDiv.current.style.top = `${context.canvasSize.height + 10}px`;
 	}, [context.canvasSize.height]);
+
+	useEffect(() => {
+		setButtonStyles({
+			backgroundColor: context.isCalculating ? "grey" : "dodgerblue",
+		});
+
+		if (context.isCalculating) {
+			setMessage("Вычисляю...");
+
+			setTimerID(
+				setTimeout(() => {
+					if (context.isCalculating) {
+						setMessage("Все еще вычисляю...");
+
+						setTimerID(
+							setTimeout(() => {
+								if (context.isCalculating) {
+									setMessage("Да, я все еще вычисляю...");
+
+									setTimerID(
+										setTimeout(() => {
+											if (context.isCalculating) {
+												setMessage("Да, алгоритм не самый быстрый...");
+
+												setTimerID(
+													setTimeout(() => {
+														if (context.isCalculating) {
+															setMessage("Да, я знаю про теорему Менгера...");
+
+															setTimerID(
+																setTimeout(() => {
+																	setMessage("Еще чуть чуть...");
+																}, 15000)
+															);
+														} else {
+															clearTimeout(timerID);
+															setMessage("");
+														}
+													}, 15000)
+												);
+											} else {
+												clearTimeout(timerID);
+												setMessage("");
+											}
+										}, 15000)
+									);
+								} else {
+									clearTimeout(timerID);
+									setMessage("");
+								}
+							}, 10000)
+						);
+					} else {
+						clearTimeout(timerID);
+						setMessage("");
+					}
+				}, 5000)
+			);
+		} else {
+			clearTimeout(timerID);
+			setMessage("");
+		}
+	}, [context.isCalculating]);
 
 	const handleChange = (e) => {
 		if (e.target.id === "L") setL(e.target.value);
@@ -50,14 +116,16 @@ const Settings = () => {
 	};
 
 	const showDomainsCount = () => {
-		const numOfDomains = context.calcDomains(context.hexMap, context.selected, false);
-		setDomainsCount(numOfDomains.totalNumberOfDomains);
+		context.calcDomains(context.hexMap, context.selected, false);
 	};
 
-	const autoFill = () => {
-		if (Number(autoPossibility) > 0 && Number(autoPossibility) < 1)
-			context.autoFill(autoPossibility, context.hexMap);
-		else alert("Вероятность должна быть от 0.1 до 0.99");
+	const handleAutoFill = () => {
+		if (Number(autoPossibility) <= 0 || Number(autoPossibility) >= 1) {
+			alert("Вероятность должна быть от 0.1 до 0.99");
+			return;
+		}
+
+		context.autoFill(autoPossibility, context.hexMap);
 	};
 
 	useEffect(() => {
@@ -86,7 +154,9 @@ const Settings = () => {
 			</div>
 			<div>&nbsp;</div>
 			<div>
-				<button onClick={changeGridDimensions}>Применить</button>
+				<button onClick={changeGridDimensions} style={buttonStyles} disabled={context.isCalculating}>
+					Применить
+				</button>
 			</div>
 			<div>&nbsp;</div>
 			<div>&nbsp;</div>
@@ -98,7 +168,9 @@ const Settings = () => {
 			</div>
 			<div>&nbsp;</div>
 			<div>
-				<button onClick={autoFill}>АВТО</button>
+				<button onClick={handleAutoFill} style={buttonStyles} disabled={context.isCalculating}>
+					АВТО
+				</button>
 			</div>
 			<div>&nbsp;</div>
 			<div>&nbsp;</div>
@@ -110,8 +182,11 @@ const Settings = () => {
 			</div>
 			<div>&nbsp;</div>
 			<div>
-				<button onClick={showDomainsCount}>Рассчитать кол-во</button>
+				<button onClick={showDomainsCount} style={buttonStyles} disabled={context.isCalculating}>
+					Рассчитать кол-во
+				</button>
 			</div>
+			<div style={{ gridColumn: "1/3" }}>{message}</div>
 		</div>
 	);
 };

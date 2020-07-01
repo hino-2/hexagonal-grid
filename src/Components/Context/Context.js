@@ -1,9 +1,48 @@
 import React, { useState, createContext } from "react";
-import { splitSelectedToDomains, floodFillHexMap, checkIfMultiConnected } from "../../GrafLogic/graf-logic";
+import Worker from "./file.worker.js";
 
 export const Context = createContext();
 
 export const ContextProvider = (props) => {
+	const [worker, setWorker] = useState(new Worker());
+
+	const handleWorkerCompletion = (message) => {
+		if (message.data.command === "done") {
+			setContext((prev) => {
+				const numOfDomains = {
+					totalNumberOfDomains: message.data.totalNumberOfDomains,
+					numOfMultiConnectedDomains: message.data.numOfMultiConnectedDomains,
+				};
+
+				let res = makeResults(
+					message.data.auto ? prev.p : undefined,
+					prev.results,
+					numOfDomains,
+					message.data.hexMap
+				);
+				if (res.length > 10) res = res.slice(1);
+
+				return {
+					...prev,
+					results: res,
+					domainsCount: numOfDomains,
+					selected: message.data.selected,
+					isCalculating: false,
+				};
+			});
+			worker.removeEventListener("message", handleWorkerCompletion);
+		}
+	};
+
+	const startWorker = (hexMap, selected, auto) => {
+		worker.addEventListener("message", handleWorkerCompletion, false);
+		worker.postMessage({
+			hexMap: hexMap,
+			selected: selected,
+			auto: auto,
+		});
+	};
+
 	const changeHexGridParams = (newParams = {}) => {
 		setContext((prev) => {
 			return { ...prev, ...newParams, selected: [] };
@@ -62,41 +101,14 @@ export const ContextProvider = (props) => {
 	};
 
 	const calcDomains = (hexMap, selected, auto) => {
-		let domains = [];
-		hexMap.forEach((h) => (h.color = undefined));
+		startWorker(hexMap, selected, auto);
 
-		floodFillHexMap(hexMap, selected);
-		domains = splitSelectedToDomains(selected);
-		const totalNumberOfDomains = domains.length;
-
-		// multi-connection search
-		let numOfMultiConnectedDomains = 0;
-
-		domains.forEach((d) => {
-			numOfMultiConnectedDomains += checkIfMultiConnected(d, hexMap, selected, totalNumberOfDomains);
+		setContext((prev) => {
+			return {
+				...prev,
+				isCalculating: true,
+			};
 		});
-		// multi-connection search end
-
-		if (!auto)
-			setContext((prev) => {
-				let res = makeResults(
-					undefined,
-					prev.results,
-					{ totalNumberOfDomains, numOfMultiConnectedDomains },
-					hexMap
-				);
-				if (res.length > 10) res = res.slice(1);
-
-				return {
-					...prev,
-					hexMap: hexMap,
-					results: res,
-					selected: selected,
-					domains: domains,
-				};
-			});
-
-		return { totalNumberOfDomains, numOfMultiConnectedDomains };
 	};
 
 	const autoFill = (p, hexMap) => {
@@ -106,22 +118,19 @@ export const ContextProvider = (props) => {
 			h.color = undefined;
 		});
 
-		const numOfDomains = calcDomains(
+		calcDomains(
 			hexMap,
 			hexMap.filter((h) => h.checked),
 			true
 		);
 
 		setContext((prev) => {
-			let res = makeResults(p, prev.results, numOfDomains, hexMap);
-			if (res.length > 10) res = res.slice(1);
-
 			return {
 				...prev,
+				isCalculating: true,
 				hexMap: hexMap,
 				selected: hexMap.filter((h) => h.checked),
-				results: res,
-				domainsCount: numOfDomains,
+				p: p,
 			};
 		});
 	};
@@ -131,7 +140,9 @@ export const ContextProvider = (props) => {
 		M: 5,
 		N: 7,
 		hexSize: 20,
-		canvasSize: { width: window.innerWidth - 2, height: 290 },
+		canvasSize: { width: window.innerWidth - 2, height: 300 },
+		p: undefined,
+		isCalculating: false,
 		hexMap: [],
 		selected: [],
 		domains: [],

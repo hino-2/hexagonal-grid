@@ -48,6 +48,8 @@ export const floodFillHexMap = (hexMap, selected) => {
 					.padStart(6, "0");
 			floodFill(h, color, hexMap, selected);
 		});
+
+	return selected;
 };
 
 export const checkIfMultiConnected = (d, hexMap, selected, totalNumberOfDomains) => {
