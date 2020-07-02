@@ -53,25 +53,24 @@ const HexGridContainer = () => {
 	});
 
 	const handleMouseClick = (e) => {
+		if (context.isCalculating) return;
+
 		const offsetX = e.pageX - hexGridBase.canvasRect.left - hexSize * 2;
 		const offsetY = e.pageY - hexGridBase.canvasRect.top;
 		const { q, r, s } = hexGridBase.cubeRound(hexGridBase.pixelToHex(hexGridBase.Point(offsetX, offsetY)));
 
-		let insideMap = hexGridBase.hexMap.find(({ q: _q, r: _r, s: _s }) => _q === q && _r === r && _s === s);
-		if (!insideMap) return;
-		else insideMap.checked = 1;
+		let hexInsideMap = hexGridBase.hexMap.find(({ q: _q, r: _r, s: _s }) => _q === q && _r === r && _s === s);
+		if (!hexInsideMap) return;
 
 		if (context.selected.find(({ q: _q, r: _r, s: _s }) => _q === q && _r === r && _s === s)) {
-			insideMap.checked = 0;
+			hexInsideMap.checked = 0;
 			context.removeHexFromDomains({ q, r, s });
-			context.setHexMap(hexGridBase.hexMap);
-
-			return;
+		} else {
+			hexInsideMap.checked = 1;
+			const { x, y } = hexGridBase.hexToPixel(hexGridBase.Hex(q, r, s));
+			context.addHexToSelected({ q, r, s, x, y, undefined });
 		}
 
-		const { x, y } = hexGridBase.hexToPixel(hexGridBase.Hex(q, r, s));
-
-		context.addHexToSelected({ q, r, s, x, y, undefined });
 		context.setHexMap(hexGridBase.hexMap);
 	};
 
